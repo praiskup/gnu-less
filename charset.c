@@ -499,7 +499,7 @@ utf_len(ch)
 	if ((ch & 0xFE) == 0xFC)
 		return 6;
 	/* Invalid UTF-8 encoding. */
-	return 1;
+	return 0;
 }
 
 /*
@@ -517,7 +517,7 @@ is_utf8_well_formed(s, slen)
 		return (0);
 
 	len = utf_len((char) s[0]);
-	if (len > slen)
+	if (len > slen || len == 0)
 		return (0);
 	if (len == 1)
 		return (1);
@@ -693,6 +693,10 @@ step_char(pp, dir, limit)
 	} else if (dir > 0)
 	{
 		len = utf_len(*p);
+		if (!len)
+			// workaround broken utf8 bytes
+			len = 1;
+
 		if (p + len > limit)
 		{
 			ch = 0;
